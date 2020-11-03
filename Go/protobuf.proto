@@ -1,0 +1,97 @@
+/*
+protobuf 语法解析
+*/
+
+syntax = "proto3";    //指定proto版本，默认为proto2
+
+
+message SearchRequest {       //message 对应go中的struct
+    string query = 1;
+    int32 page_number =2;
+    int32 result_per_page = 3;
+}
+
+
+以上fields的种类都是数值型（string和int32），当然也可以是enum，是嵌套的message
+
+a、分配field编号：
+    编号是field的唯一标识;
+    需要注意的是: 
+        标识1-15占用1个字节
+        标识16-2047占用2个字节
+
+    编号的范围：
+        1 -- 2^29（其中19000-19999是系统保留的，不能使用）
+    建议：
+        对于经常出现的elment，使用1-15作为唯一标识
+        对于不经常使用的element，建议使用16-2047
+
+        唯一的数值标签用来标识 二进制消息 中你所定义的字段，
+        一旦定义了编译后就无法修改。
+    
+b、field类型
+    message中，field类型包含以下两种（proto3）
+        1、 singular：（默认）在传递消息的时候，该字段可以出现 0 或 1次（不能大于1次）
+        2、repeated：该类型的field可以在message中重复使用（类似于数组）
+        他们的顺序会被保存，通过索引进行检索，数值类型的repeated默认使用
+        packed编码方式。该字段可以出现任意次（包含 0）。
+
+c、定义多个message
+    在一个proto文件中可以定义多个message
+
+d、reserved field类型
+    在开发过程中可能会涉及到对proto文件中message各个fields的修改，
+    可能是更新、删除某个field及其表示，这样可能会导致调用的服务失败。
+    其中一个防止这种问题的方式是，确保你要删除的field的标识（或是名字）
+    是reserved，具体protobuf的编译器会决定未来这个field表示能否被使用
+    //数字标识和命名不能在同一条语句中混合声明
+        message Foo {
+           reserved 2, 15, 9 to 11;
+           reserved "foo", "bar";
+        }
+
+
+数组类型：
+.proto Type   go Type       proto类型的含义
+-----------------------------------------------------
+double         float64
+float          float32              
+int32          int32        使用可变长度编码。负数编码效率低下–如果您的字段可能具有负值，请改用sint32
+int64          int64        使用可变长度编码。负数编码效率低下–如果您的字段可能具有负值，请改用sint64。
+uint32         uint32       使用可变长度编码。
+unit64         uint64       使用可变长度编码。
+sint32         int32        使用可变长度编码。有符号的int值。与常规int32相比，它们更有效地编码负数。
+sint64         int664       使用可变长度编码。有符号的int值。与常规int64相比，它们更有效地编码负数。
+fixed32        uint32       始终为四个字节。如果值通常大于2^28，则比uint32更有效。
+fixed64        uinit64      始终为八个字节。如果值通常大于2^56，则比uint64更有效。
+sfixed32       int32        始终为四个字节。
+sfixed64       int64        始终为八个字节。
+bool           bool
+string         string       字符串必须始终包含UTF-8编码或7位ASCII文本，并且不能超过2^32。
+bytes          []byte       可以包含不超过232个任意字节序列。
+
+默认值：
+    对于string和byte类型，默认值为空；
+    对于bool类型，默认值是false；
+    对于数值类型，默认值是0；
+    对于枚举类型，默认值是第一个枚举值，默认为0；
+    对于message类型，默认值由编程语言决定；
+    对于repeated field，默认值为空
+
+枚举类型：
+    枚举中的值都是预先定义好的。
+    
+    通常枚举类型的第一个值初始化为0，而且在message中使用枚举类型，
+    必须要给定一个为0的值，而且这个为0的值应该为第一个元素
+    
+    使用 option allow_alias = true 使enum支持alias， 如：
+        enum Test {
+            option allow_alias = true；
+            UnKNOWN =0;
+            STARTED = 1;
+            RUN =1;            //RUN 相当于是START的别名
+        }
+    
+    枚举内的常量必须不能超过32位整型的数字，不建议使用负数    
+
+package：指定包名

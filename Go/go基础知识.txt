@@ -1,0 +1,284 @@
+定义变量：
+	var variableNmae  type      //定义一个变量名为“variableName”的变量，变量的类型为“type”
+	
+	定义多变量：
+		var vname1, vname2, vname3  type
+	定义变量并初始化：
+		var variableName type = value
+	定义多个变量并初始化：
+		var vname1, vname2, vname3 type = v1, v2, v3
+		简化1：
+		var vname1, vname2, vname3 = v1, v2, v3   //go可以根据相应值的类型进行初始化，省略type
+		简化2：
+		vname1, vname2, vname3 := v1, v2, v3     //省略“var”关键字，但这种方法只能在函数内使用
+	丢弃值的变量：（_：下划线）
+		_, b := 34, 35    //34将被丢弃
+	
+	常量：(在程序编译阶段就确定的值，程序运行时无法改变，常量可以定义数值、布尔值或字符串等类型)
+		const constantName = value   //如果有需要可以指明常量类型
+		
+	Boolean类型：
+		在go语言中，布尔值的类型为bool，值为“true”或“false”，默认为false
+
+类型：
+	数值类型：
+		整数类型包含无符号和有符号两种。go同时支持int和uint
+			int8、int16、int32(别称rune)、int64
+			uint8(别称byte)、uint16、uint32、uint64
+		浮点数：
+			float32
+			float64(default)
+		复数：
+			complex64(32位实数 + 32位虚数)
+			complex128(64位实数 + 64位虚数)(default)
+		字符串：
+			Go中的字符串都是采用UTF-8字符集编码。
+			字符串是用一对引号括起来定义，它的类型是string。
+			字符串是不可变的
+			字符串是可以使用“+”相连接
+			注：如果想要修改字符串：
+				s := "hello"
+				c := []byte(s)  // 将字符串 s 转换为 []byte 类型
+				c[0] = 'c'
+				s2 := string(c)  // 再转换回 string 类型
+				fmt.Printf("%s\n", s2)
+	错误类型：
+		go内置一个“error”类型，专门用来处理错误信息，go的package里面还有专门一个包error来处理错误
+		
+	技巧：
+		同时声明多个常量、变量，或者导入多个包时，可采用分组的方式进行声明
+			import/const/var](   //以import为例
+				"fmt"    
+				"os"
+			)
+	iota枚举：
+		关键字iota，这个关键字用来声明enum的时候采用，它默认开始值是0，const中每增加一行加1：iota自增被打断，必须显示恢复
+		const (
+			a = iota // x == 0
+			b = iota // y == 1
+			c = 'B'
+			d = 75
+			e, f, g = iota, iota, iota //e=4,f=4,g=4
+			h = iota // h == 5
+			i        // 常量声明省略值时，默认和之前一个值的字面相同。这里隐式地说i = iota，因此i == 6。
+		)
+	go的涉及规则：(默认行为)
+		大写字母开头的变量是可导出的，也就是其它包可以读取的，是公有变量；小写字母开头的就是不可导出的，是私有变量。
+		大写字母开头的函数也是一样，相当于class中的带public关键词的公有函数；小写字母开头的就是有private关键词的私有函数。
+
+数组、切片、字典：
+	数组(array):
+		var arrName [n]type   //[n]type中，n表示数组长度，type表示存储元素的类型。
+	由于长度也是数组类型的一部分，因此[3]int与[4]int是不同的类型，数组也就不能改变长度。
+	数组之间的赋值是值的赋值，即当把一个数组作为参数传入函数的时候，传入的其实是该数组的副本，而不是它的指针。
+	如果要使用指针，那么就需要用到后面介绍的slice类型了。
+	数组也可以使用“:=”来赋值
+		a := [3]int{1, 2, 3}
+		b := [10]int{1, 2, 3} // 其中前三个元素初始化为1、2、3，其它默认为0
+		c := [...]int{4, 5, 6} // 可以省略长度而采用`...`的方式，Go会自动根据元素个数来计算长度
+	
+	切片(slice)：
+		var fslice  []type
+		slice并不是真正意义上的动态数组，而是一个引用类型。slice总是指向一个底层array，slice的声明也可以像array一样，只是不需要长度。
+		slice是引用类型，所以当引用改变其中元素的值时，其它的所有引用都会改变该值
+		len()获取slice的长度
+		cap()获取slice的最大容量
+		append()向slice追加一个或多个元素，然后返回一个和slice一样类型的slice
+		copy()函数copy从源slice的src中复制元素到dst，并返回复制元素的个数
+	
+	slice和array的区别：
+		1、申请时，数组需要提供长度或“...”，slice不确定
+		？？？？？？
+	
+	字典(map):
+		map[keyType]valueType
+		map的读取和设置也类似slice一样，通过key来操作，只是slice的index只能是｀int｀类型，而map多了很多类型
+		注意：
+			map是无序的
+			map的长度不固定，和slice一样，是一种引用类型
+			内置函数len，同样适用于map
+			map和其他基本型别不同，它不是thread-safe，在多个go-routine存取时，必须使用mutex lock机制
+			delete函数可以删除map的元素
+			
+	make、new函数：
+		make用于内建类型（map、slice 和channel）的内存分配。new用于各种类型的内存分配。
+		new(T)分配了零值填充的T类型的内存空间，并返回其地址，即一个*T类型的值。返回的是一个指针，指向新分配的类型T的零值。
+		内建函数make(T, args)与new(T)有着不同的功能，make只能创建slice、map和channel，并且返回一个有初始值(非零)的T类型，而不是*T。
+		本质来讲，导致这三个类型有所不同的原因是指向数据结构的引用在使用前必须被初始化。make返回初始化后的（非零）值。
+		
+
+流程：
+	if、goto、for、switch、break、continue、fallthrough
+	for语句：
+		for expression1; expression2; expression3 {
+			//...
+		}
+		表达式expression1/expression2/expression3都可以省略，当省略expression1和expression3时，for循环相当于while循环。分号也可以省略
+	break：跳出循环，执行循环外的代码
+	continue：跳出本次循环
+
+	switch语句：
+		switch sExpr {
+			case expr1:
+				some instructions
+			case expr2:
+				some other instructions
+			case expr3:
+				some other instructions
+			default:
+				other code
+		}
+		每个case最后默认带有break，如果想强制执行匹配case后的代码，可以在匹配的case最后添加fallthrough
+		
+函数：
+	func funcName(input1 type1, input2 type2) (output1 type1, output2 type2) {
+		//......
+		return value1, value2
+	}
+	关键字func用来声明一个函数funcName
+	函数可以有一个或者多个参数，每个参数后面带有类型，通过,分隔
+	函数可以返回多个值
+	上面返回值声明了两个变量output1和output2，如果你不想声明也可以，直接就两个类型
+	如果只有一个返回值且不声明返回值变量，那么你可以省略 包括返回值 的括号
+	如果没有返回值，那么就直接省略最后的返回信息
+	如果有返回值， 那么必须在函数的外层添加return语句
+	
+	变参函数：
+		func myfunc(arg ...int) {}
+	注意：当我们传一个参数值到被调用函数里面时，实际上是传了这个值的一份copy，当在被调用函数中修改参数值的时候，调用函数中相应实参不会发生任何变化，因为数值变化只作用在copy上。
+	
+	defer函数：
+		在函数中添加多个defer语句。当函数执行到最后时，这些defer语句会按照逆序执行，最后该函数返回。
+	
+	函数作为值、类型：
+		type typeName func(input1 inputType1 , input2 inputType2 [, ...]) (result1 resultType1 [, ...])
+		在Go中函数也是一种变量，我们可以通过type来定义它，它的类型就是所有拥有相同的参数，相同的返回值的一种类型
+	
+	panic函数和recover函数：
+		panic：
+		是一个内建函数，可以中断原有的控制流程，进入一个panic状态中。当函数F调用panic，函数F的执行被中断，但是F中的延迟函数会正常执行，然后F返回到调用它的地方。在调用的地方，F的行为就像调用了panic。这一过程继续向上，直到发生panic的goroutine中所有调用的函数返回，此时程序退出。panic可以直接调用panic产生。也可以由运行时错误产生，例如访问越界的数组。
+		recover：
+		是一个内建的函数，可以让进入panic状态的goroutine恢复过来。recover仅在延迟函数中有效。在正常的执行过程中，调用recover会返回nil，并且没有其它任何效果。如果当前的goroutine陷入panic状态，调用recover可以捕获到panic的输入值，并且恢复正常的执行。
+	
+	main函数和init函数
+		init函数（能够应用于所有的package）和main函数（只能应用于package main）
+		这两个函数在定义时不能有任何的参数和返回值。
+		Go程序会自动调用init()和main()，不需要在任何地方显示调用这两个函数。
+		每个package中的init函数都是可选的，但package main就必须包含一个main函数。
+		了解:
+		程序的初始化和执行都起始于main包。如果main包还导入了其它的包，那么就会在编译时将它们依次导入。有时一个包会被多个包同时导入，那么它只会被导入一次（例如很多包可能都会用到fmt包，但它只会被导入一次，因为没有必要导入多次）。当一个包被导入时，如果该包还导入了其它的包，那么会先将其它包导入进来，然后再对这些包中的包级常量和变量进行初始化，接着执行init函数（如果有的话），依次类推。等所有被导入的包都加载完毕了，就会开始对main包中的包级常量和变量进行初始化，然后执行main包中的init函数（如果存在的话），最后执行main函数。
+	闭包：
+		一个外层函数中，有内层函数，该内层函数中，会操作外层函数的局部变量（外层函数的参数或自定义的变量），并且外层函数的返回值就是这个内层函数，这个内层函数和外层函数的局部变量，统称为闭包结构。
+		局部变量的生命周期会发生改变，正常的局部变量随着函数调用而创建，随着函数结束而销毁，但闭包结构中的外层函数的局部变量并不会随着外层函数的结束而销毁，因为内层函数还要继续使用。
+	
+
+	import：
+		导入包的两种方法：
+			1、相对路径
+				import "./model"
+			2、绝对路径
+				import "shorturl/model"    //加载gopath/src/shorturl/model模块
+		常用方式：
+			1、点操作
+			import(
+				. "fmt"
+			)   //这样导入，在后面代码中使用时可以省略前缀“fmt.”
+			2、别名
+			import(
+				f  "fmt"
+			)   //这样导入，在后面代码中使用时可以把前缀"fmt.Println()"写成"f.Println"
+			3、_ 操作：(下划线)
+			import (
+				"database/sql"
+				_ "github.com/ziutek/mymysql/godrv"   
+			)
+			_操作其实是引入该包，而不直接使用包里面的函数，而是调用了该包里面的init函数。
+	
+struct类型：
+	type structName  struct {
+		attrname  type
+		......
+	}
+	可含有匿名字段(也称嵌入字段)当匿名字段是一个struct的时候，那么这个struct所拥有的全部字段都被隐式地引入了当前定义的这个struct。
+	
+面向对象：
+	method：
+		func (r ReceiverType) funcName(parameters) (results)
+	method是附属在一个给定的类型上的，他的语法和函数的声明语法几乎一样，只是在func后面增加了一个receiver(也就是method所依从的主体)。
+	注意：
+		1、如果一个method的receiver是*T,你可以在一个T类型的实例变量V上面调用这个method，而不需要&V去调用这个method
+		2、如果一个method的receiver是T，你可以在一个*T类型的变量P上面调用这个method，而不需要 *P去调用这个method
+		
+	自定义类型：
+		type typeName typeLiteral
+	
+interface：
+	interface类型：
+		定义了一组方法，如果某个对象实现了某个接口的所有方法，则此对象就实现了此接口
+		interface可以被任意的对象实现；
+		一个对象可以实现任意多个interface；
+		任意的类型都实现了空interface(我们这样定义：interface{})，也就是包含0个method的interface；
+	interface值：
+		interface类型的变量，可以存储实现这个interface的任意类型的对象。
+		interface就是一组抽象方法的集合，它必须由其他非interface类型实现，而不能自我实现
+	空interface：
+		空interface(interface{})不包含任何的method，因此，所有的类型都实现了空interface。
+		空interface对于描述起不到任何的作用(因为它不包含任何的method），但是空interface在我们需要存储任意类型的数值的时候相当有用，因为它可以存储任意类型的数值。
+	interface函数参数：
+		......
+	interface变量存储类型：
+		判断方法：
+		1、Comma-ok断言：
+		Go语言里面有一个语法，可以直接判断是否是该类型的变量： 
+			value, ok = element.(T)
+		这里value就是变量的值，ok是一个bool类型，element是interface变量，T是断言的类型。
+		如果element里面确实存储了T类型的数值，那么ok返回true，否则返回false。
+	嵌入interface：
+		与struct类型
+		例：
+			type Interface interface {
+				sort.Interface //嵌入字段sort.Interface
+				Push(x interface{}) //a Push method to push elements into the heap
+				Pop() interface{} //a Pop elements that pops elements from the heap
+			}
+		sort.Interface包含以下，上面的Interface隐式的包含了sort.Interface内的mothed。
+	
+反射：
+	反射就是能检查程序在运行时的状态。一般要用到包reflect包
+	
+并发：
+	goroutine：
+		goroutine是Go并行设计的核心；
+		goroutine是通过Go的runtime管理的一个线程管理器；
+		
+	注意：不要通过共享来通信，而要通过通信来共享
+	
+channels：
+	定义一个channel时，也需要定义发送到channel的值的类型。注意，必须使用make 创建channel
+		ci := make(chan int)
+		cs := make(chan string)
+		cf := make(chan interface{})
+	channel通过符号 "<-" 来接收和发送数据
+	channel接收和发送数据都是阻塞的。阻塞就是如果读取（value := <-ch）它将会被阻塞，直到有数据接收。其次，任何发送（ch<-5）将会被阻塞，直到数据被读出。无缓冲channel是在多个goroutine之间同步很棒的工具。
+	
+	Buffered Channels：
+		ch := make(chan type, value)
+	在ch中，前value个元素写入是无阻塞的，当地value+1个元素写入时，会被阻塞，直到ch中有数据取出，腾出空间。
+	for i := range ch {} //能够不断的读取ch里面的数据，直到该ch被显式的关闭(即使用close(ch)关闭channel)。
+	注意：
+		应该在生产者的地方关闭channel，而不是消费的地方去关闭它，否则容易引起panic
+		channel不像文件之类的，不需要经常去关闭，只有当你确实没有任何发送数据了，或者你想显式的结束range循环之类的
+	关键字select：
+		通过select可以监听channel上的数据流动
+		select默认是阻塞的，只有当监听的channel中有发送或接收可以进行时才会运行，当多个channel都准备好的时候，select是随机的选择一个执行的。
+		在select里面还有default语法，select其实就是类似switch的功能，default就是当监听的channel都没有准备好的时候，默认执行的（select不再阻塞等待channel）
+	
+超时：
+	利用select来设置超时
+	
+	
+	
+	
+	
+	
+	
