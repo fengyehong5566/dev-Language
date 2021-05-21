@@ -1,0 +1,61 @@
+---
+pidpath: /home/hcicloud/aicp/pids
+hostip: 10.0.1.181   #要监控主机的IP
+servirce_port: 9100
+log_level: info
+metrics:
+#  - aicp_asr_ft_cn_16k_huiyi    // 指定指标的名字，推荐使用应用程序名称
+#    service_type:  此次可填写 consul里service列里的值如aicp_asr_ft、aicp_asr_trans、aicp_license
+#    monitor_port: 23001         //对应服务的监控端口
+
+#  - metric: aicp_asr_ft_cn_16k_huiyi
+#    service_type: aicp_asr_ft
+#    monitor_port: 23001
+#
+#  - metric: aicp_asr_ft_en_16k_common
+#    service_type: aicp_asr_ft
+#    monitor_port: 23003
+#
+#  - metric: aicp_asr_trans_en_16k_common
+#    service_type: aicp_asr_trans
+#    monitor_port: 14006
+
+#  - metric: aicp_trans_http
+#    service_type: aicp_trans_http
+#    monitor_port: 14000
+
+#  - metric: aicp_mt
+#    service_type: aicp_mt
+#    monitor_port: 24501
+
+  - metric: aicp_apigw
+    service_type: aicp_apigw
+    monitor_port: 22803
+
+  - metric: aicp_license
+    service_type: aicp_license
+    monitor_port: 21001
+#
+#  - metric: aicp_tts
+#    service_type: aicp_tts
+#    monitor_port: 24001
+#
+  - metric: aicp_asr_ft_bo_16k_common
+    service_type: aicp_asr_ft
+    monitor_port: 23009
+
+  - metric: aicp_asr_ft-x-sichuan_16k_common
+    service_type: aicp_asr_ft
+    monitor_port: 23007
+
+  - metric: aicp_asr_ft-en_16k_common
+    service_type: aicp_asr_ft
+    monitor_port: 23003
+
+  - metric: aicp_asr_ft-ug_16k_common
+    service_type: aicp_asr_ft
+    monitor_port: 23005
+
+  - metric: aicp_asr_ft
+    service_type: aicp_asr_ft
+    monitor_port: 23001
