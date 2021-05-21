@@ -278,7 +278,7 @@ channels：
 	
 	
 	
-	
-	
+不可复制类型：【建议使用指针】
+	Go 提供的不可复制的类型基本上就是 sync 包内的所有类型: atomic.Value, Mutex, Cond, RWMutex, sync.Map, sync.Pool, WaitGroup.
 	
 	
